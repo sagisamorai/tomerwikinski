@@ -1,13 +1,36 @@
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, Users, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+interface DynamicPage {
+  title: string;
+  content: string;
+}
 
 const HomePage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'he';
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
+
+  // Fetch "about" page content from DB so admin edits show up
+  const [aboutPage, setAboutPage] = useState<DynamicPage | null>(null);
+
+  const fetchAbout = useCallback(() => {
+    const lang = localStorage.getItem('i18nextLng') || 'he';
+    fetch(`/api/pages/public/about?lang=${lang}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setAboutPage(data); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { fetchAbout(); }, [fetchAbout]);
+  useEffect(() => {
+    const handler = () => fetchAbout();
+    window.addEventListener('languageChanged', handler);
+    return () => window.removeEventListener('languageChanged', handler);
+  }, [fetchAbout]);
 
   return (
     <div className="animate-fade-in">
@@ -38,8 +61,16 @@ const HomePage: React.FC = () => {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">{t('home.aboutTitle')}</h2>
-          <p className="text-lg text-slate-600 leading-relaxed mb-6">{t('home.aboutP1')}</p>
-          <p className="text-lg text-slate-600 leading-relaxed">{t('home.aboutP2')}</p>
+          {aboutPage ? (
+            aboutPage.content.split(/\n\n+/).filter(Boolean).map((p, i) => (
+              <p key={i} className="text-lg text-slate-600 leading-relaxed mb-6">{p}</p>
+            ))
+          ) : (
+            <>
+              <p className="text-lg text-slate-600 leading-relaxed mb-6">{t('home.aboutP1')}</p>
+              <p className="text-lg text-slate-600 leading-relaxed">{t('home.aboutP2')}</p>
+            </>
+          )}
         </div>
       </section>
 
