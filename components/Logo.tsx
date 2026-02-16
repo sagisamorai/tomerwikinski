@@ -52,7 +52,7 @@ const Logo: React.FC<LogoProps> = ({
   );
 
   if (to) {
-    return <Link to={to} className="inline-flex items-center">{content}</Link>;
+    return <Link to={to} className="inline-flex items-center max-w-full overflow-hidden">{content}</Link>;
   }
 
   return content;

@@ -40,14 +40,16 @@ const Navbar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className="flex justify-between items-center transition-all duration-300"
+          className="flex items-center transition-all duration-300"
           style={{ height: scrolled ? '64px' : '76px' }}
         >
-          <div className="flex-shrink-0 flex items-center" style={{ maxHeight: '100%' }}>
+          {/* Logo - fixed width so it never pushes links */}
+          <div className="flex-shrink-0 flex items-center overflow-hidden" style={{ maxWidth: '180px', maxHeight: '100%' }}>
             <Logo to="/" className="text-slate-900" prefixClass="text-slate-500" context="navbar" />
           </div>
           
-          <div className="hidden md:flex items-center gap-1">
+          {/* Nav links - take all remaining space, centered */}
+          <div className="hidden md:flex flex-1 items-center justify-center">
             <div className={`flex items-center ${isRtl ? 'space-x-6 space-x-reverse' : 'space-x-6'}`}>
               {navLinks.map((link) => (
                 <Link
@@ -63,12 +65,15 @@ const Navbar: React.FC = () => {
                 </Link>
               ))}
             </div>
-            <div className="ms-3">
-              <LanguageSwitcher />
-            </div>
           </div>
 
-          <div className="md:hidden flex items-center gap-2">
+          {/* Language switcher - fixed width on the end */}
+          <div className="hidden md:flex flex-shrink-0 items-center">
+            <LanguageSwitcher />
+          </div>
+
+          {/* Mobile menu */}
+          <div className="md:hidden flex flex-1 items-center justify-end gap-2">
             <LanguageSwitcher />
             <button
               onClick={() => setIsOpen(!isOpen)}
