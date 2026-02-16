@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         } lg:static lg:z-auto`}
       >
         <div className="flex items-center justify-between p-5 border-b border-slate-700 min-h-[64px]">
-          <div className="overflow-hidden max-w-[170px]">
+          <div className="overflow-hidden flex-1 min-w-0">
             <Logo to="/admin" className="text-white" prefixClass="text-slate-400" context="sidebar" />
             <span className="block text-xs text-slate-500 font-normal mt-0.5">פאנל ניהול</span>
           </div>

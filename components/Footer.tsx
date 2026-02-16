@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div>
-            <div className="mb-6 max-h-[52px] overflow-hidden flex items-center">
+            <div className="mb-6 flex items-center max-w-full overflow-hidden" style={{ maxHeight: '100px' }}>
               <Logo to="/" className="text-white" prefixClass="text-slate-400" context="footer" />
             </div>
             <p className="text-sm leading-relaxed mb-6">

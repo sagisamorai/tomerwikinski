@@ -11,12 +11,6 @@ interface LogoProps {
   imgClass?: string;
 }
 
-const contextConfig: Record<string, { maxHeight: number }> = {
-  navbar:  { maxHeight: 56 },
-  sidebar: { maxHeight: 36 },
-  footer:  { maxHeight: 52 },
-};
-
 const Logo: React.FC<LogoProps> = ({
   to = '/',
   className = '',
@@ -29,41 +23,49 @@ const Logo: React.FC<LogoProps> = ({
   const [imgError, setImgError] = useState(false);
 
   const isFooter = context === 'footer';
+  const isSidebar = context === 'sidebar';
 
-  // Footer uses its own logo settings if they exist, otherwise falls back to the main logo
   const footerHasOwnLogo = !!(settings.footer_logo_url || settings.footer_logo_prefix || settings.footer_logo_suffix);
 
   const logoUrl = isFooter && footerHasOwnLogo ? (settings.footer_logo_url || '') : (settings.logo_url || '');
   const prefix = isFooter && footerHasOwnLogo ? (settings.footer_logo_prefix || '') : (settings.logo_prefix ?? 'GROUP');
   const suffix = isFooter && footerHasOwnLogo ? (settings.footer_logo_suffix || '') : (settings.logo_suffix ?? 'CONSULT');
-  const baseSize = isFooter && footerHasOwnLogo
-    ? parseInt(settings.footer_logo_size || '36', 10)
-    : parseInt(settings.logo_size || '40', 10);
 
-  const cfg = contextConfig[context] ?? contextConfig.navbar;
-  const finalHeight = Math.min(baseSize, cfg.maxHeight);
+  // logo_size controls WIDTH for images, FONT-SIZE for text
+  const size = isFooter && footerHasOwnLogo
+    ? parseInt(settings.footer_logo_size || '160', 10)
+    : parseInt(settings.logo_size || '160', 10);
+
+  const scale = isSidebar ? 0.55 : 1;
+  const finalSize = Math.round(size * scale);
 
   const showImage = logoUrl && !imgError;
 
   const content = showImage ? (
+    // IMAGE logo: size = width, height auto (proportional)
     <img
       src={logoUrl}
       alt={`${prefix}${suffix}`}
-      style={{ height: `${finalHeight}px`, maxHeight: `${cfg.maxHeight}px` }}
-      className={`w-auto object-contain block ${imgClass}`}
+      style={{ width: `${finalSize}px` }}
+      className={`h-auto object-contain block max-w-full max-h-full ${imgClass}`}
       onError={() => setImgError(true)}
     />
   ) : (
+    // TEXT logo: size = font-size
     <span
-      className={`font-bold tracking-tight leading-none whitespace-nowrap block ${className}`}
-      style={{ fontSize: `${finalHeight}px`, lineHeight: 1.1 }}
+      className={`font-bold tracking-tight leading-none whitespace-nowrap block overflow-hidden text-ellipsis ${className}`}
+      style={{ fontSize: `${finalSize}px`, lineHeight: 1.1 }}
     >
       <span className={prefixClass}>{prefix}</span>{suffix}
     </span>
   );
 
   if (to) {
-    return <Link to={to} className="inline-flex items-center max-w-full overflow-hidden">{content}</Link>;
+    return (
+      <Link to={to} className="inline-flex items-center max-w-full max-h-full">
+        {content}
+      </Link>
+    );
   }
 
   return content;

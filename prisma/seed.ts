@@ -19,11 +19,11 @@ async function main() {
     { key: 'logo_prefix', value: 'GROUP', group: 'branding', label: 'לוגו - חלק ראשון (צבע בהיר)', type: 'text', order: 1 },
     { key: 'logo_suffix', value: 'CONSULT', group: 'branding', label: 'לוגו - חלק שני (צבע כהה)', type: 'text', order: 2 },
     { key: 'logo_url', value: '', group: 'branding', label: 'לוגו תמונה (URL) - אופציונלי, מחליף טקסט', type: 'image', order: 3 },
-    { key: 'logo_size', value: '40', group: 'branding', label: 'גודל לוגו ניווט (פיקסלים)', type: 'range', order: 4 },
+    { key: 'logo_size', value: '160', group: 'branding', label: 'גודל לוגו ניווט', type: 'range', order: 4 },
     { key: 'footer_logo_prefix', value: '', group: 'branding', label: 'לוגו פוטר - חלק ראשון (צבע בהיר)', type: 'text', order: 5 },
     { key: 'footer_logo_suffix', value: '', group: 'branding', label: 'לוגו פוטר - חלק שני (צבע כהה)', type: 'text', order: 6 },
     { key: 'footer_logo_url', value: '', group: 'branding', label: 'לוגו פוטר תמונה (URL) - אופציונלי', type: 'image', order: 7 },
-    { key: 'footer_logo_size', value: '36', group: 'branding', label: 'גודל לוגו פוטר (פיקסלים)', type: 'range', order: 8 },
+    { key: 'footer_logo_size', value: '160', group: 'branding', label: 'גודל לוגו פוטר', type: 'range', order: 8 },
     { key: 'favicon_url', value: '', group: 'branding', label: 'Favicon (URL)', type: 'image', order: 9 },
   ];
 
@@ -31,7 +31,14 @@ async function main() {
     const { key, ...rest } = s as any;
     await prisma.siteSetting.upsert({
       where: { key },
-      update: { value_en: rest.value_en || null, value_pt: rest.value_pt || null },
+      update: {
+        label: rest.label,
+        order: rest.order,
+        type: rest.type,
+        group: rest.group,
+        value_en: rest.value_en || null,
+        value_pt: rest.value_pt || null,
+      },
       create: s as any,
     });
   }

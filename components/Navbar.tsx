@@ -39,18 +39,31 @@ const Navbar: React.FC = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/*
+          Layout: 3-column flex.
+          - Logo: flex-shrink-0, capped to 35vw so it never eats nav links
+          - Nav links: flex-1, centered
+          - Language switcher: flex-shrink-0
+          min/max height keeps the bar proportional even with large logos
+        */}
         <div
-          className="flex items-center transition-all duration-300"
-          style={{ height: scrolled ? '64px' : '76px' }}
+          className="flex items-center transition-all duration-300 py-2"
+          style={{
+            minHeight: scrolled ? '64px' : '76px',
+            maxHeight: '100px',
+          }}
         >
-          {/* Logo - fixed width so it never pushes links */}
-          <div className="flex-shrink-0 flex items-center overflow-hidden" style={{ maxWidth: '180px', maxHeight: '100%' }}>
+          {/* Logo container - capped to prevent pushing nav links off screen */}
+          <div
+            className="flex-shrink-0 flex items-center overflow-hidden"
+            style={{ maxWidth: 'min(40vw, 300px)', maxHeight: '90px' }}
+          >
             <Logo to="/" className="text-slate-900" prefixClass="text-slate-500" context="navbar" />
           </div>
           
-          {/* Nav links - take all remaining space, centered */}
-          <div className="hidden md:flex flex-1 items-center justify-center">
-            <div className={`flex items-center ${isRtl ? 'space-x-6 space-x-reverse' : 'space-x-6'}`}>
+          {/* Nav links - take remaining space, always centered */}
+          <div className="hidden md:flex flex-1 items-center justify-center min-w-0">
+            <div className={`flex items-center flex-wrap justify-center gap-y-1 ${isRtl ? 'space-x-5 space-x-reverse' : 'space-x-5'}`}>
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -67,12 +80,12 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Language switcher - fixed width on the end */}
+          {/* Language switcher */}
           <div className="hidden md:flex flex-shrink-0 items-center">
             <LanguageSwitcher />
           </div>
 
-          {/* Mobile menu */}
+          {/* Mobile: language + hamburger */}
           <div className="md:hidden flex flex-1 items-center justify-end gap-2">
             <LanguageSwitcher />
             <button
