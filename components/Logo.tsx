@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../lib/useSiteSettings';
 
@@ -26,6 +26,7 @@ const Logo: React.FC<LogoProps> = ({
   imgClass = '',
 }) => {
   const { settings } = useSiteSettings();
+  const [imgError, setImgError] = useState(false);
 
   const isFooter = context === 'footer';
 
@@ -42,12 +43,15 @@ const Logo: React.FC<LogoProps> = ({
   const cfg = contextConfig[context] ?? contextConfig.navbar;
   const finalHeight = Math.min(baseSize, cfg.maxHeight);
 
-  const content = logoUrl ? (
+  const showImage = logoUrl && !imgError;
+
+  const content = showImage ? (
     <img
       src={logoUrl}
       alt={`${prefix}${suffix}`}
       style={{ height: `${finalHeight}px`, maxHeight: `${cfg.maxHeight}px` }}
       className={`w-auto object-contain block ${imgClass}`}
+      onError={() => setImgError(true)}
     />
   ) : (
     <span

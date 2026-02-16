@@ -69,13 +69,21 @@ const SiteSettings: React.FC = () => {
 
   const handleImageUpload = async (settingId: string, file: File) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('alt', 'לוגו');
-      formData.append('categoryId', '');
-      const result = await mutate('/api/media', 'POST', formData, true);
-      setValues((prev) => ({ ...prev, [settingId]: result.url }));
-      toast('התמונה הועלתה בהצלחה');
+      // Convert to base64 data URL and store directly in DB (works on Vercel)
+      if (file.size > 2 * 1024 * 1024) {
+        toast('הקובץ גדול מדי. מקסימום 2MB', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setValues((prev) => ({ ...prev, [settingId]: dataUrl }));
+        toast('התמונה נטענה בהצלחה — לחץ "שמור הכל" לשמירה');
+      };
+      reader.onerror = () => {
+        toast('שגיאה בקריאת הקובץ', 'error');
+      };
+      reader.readAsDataURL(file);
     } catch (err: any) {
       toast(err.message, 'error');
     }
