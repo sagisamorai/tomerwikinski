@@ -64,6 +64,30 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
+// Health check endpoint for debugging deployment
+app.get('/api/health', async (_req, res) => {
+  const checks: Record<string, any> = {
+    env: {
+      DATABASE_URL: !!process.env.DATABASE_URL,
+      CLERK_PK: !!process.env.VITE_CLERK_PUBLISHABLE_KEY,
+      CLERK_SK: !!process.env.CLERK_SECRET_KEY,
+      VERCEL: !!process.env.VERCEL,
+      NODE_ENV: process.env.NODE_ENV || 'undefined',
+    },
+    timestamp: new Date().toISOString(),
+  };
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const testPrisma = new PrismaClient();
+    await testPrisma.$queryRaw`SELECT 1`;
+    checks.database = 'connected';
+    await testPrisma.$disconnect();
+  } catch (err: any) {
+    checks.database = `error: ${err.message}`;
+  }
+  res.json(checks);
+});
+
 app.use('/api/pages', pagesRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/settings', settingsRouter);
