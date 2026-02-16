@@ -19,25 +19,34 @@ import dashboardRouter from './routes/dashboard.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env.local manually for env vars Clerk needs
-const envLocalPath = path.join(__dirname, '..', '.env.local');
-if (fs.existsSync(envLocalPath)) {
-  const lines = fs.readFileSync(envLocalPath, 'utf-8').split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const eqIdx = trimmed.indexOf('=');
-    if (eqIdx === -1) continue;
-    const key = trimmed.slice(0, eqIdx).trim();
-    const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
-    if (!process.env[key]) process.env[key] = val;
+// Load .env.local manually for local development
+if (!process.env.VERCEL) {
+  const envLocalPath = path.join(__dirname, '..', '.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    const lines = fs.readFileSync(envLocalPath, 'utf-8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+      if (!process.env[key]) process.env[key] = val;
+    }
   }
 }
 
 const app = express();
 const PORT = parseInt(process.env.SERVER_PORT || '3006', 10);
 
-app.use(cors({ origin: ['http://localhost:3005', 'http://localhost:3000'], credentials: true }));
+const allowedOrigins = [
+  'http://localhost:3005',
+  'http://localhost:3000',
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+  process.env.PRODUCTION_URL || '',
+].filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,7 +55,13 @@ app.use(clerkMiddleware({
   secretKey: process.env.CLERK_SECRET_KEY,
 }));
 
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+// Serve uploaded files - use /tmp on Vercel (ephemeral), local uploads/ dir otherwise
+const uploadsDir = process.env.VERCEL
+  ? path.join('/tmp', 'uploads')
+  : path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 app.use('/uploads', express.static(uploadsDir));
 
 app.use('/api/pages', pagesRouter);
@@ -65,18 +80,23 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(500).json({ error: 'שגיאת שרת פנימית' });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+// Only start listening in local development (not on Vercel serverless)
+if (!process.env.VERCEL) {
+  const server = app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+  });
 
-server.on('error', (err: any) => {
-  console.error('Server listen error:', err);
-});
+  server.on('error', (err: any) => {
+    console.error('Server listen error:', err);
+  });
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err);
-});
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err);
+  });
 
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled rejection:', err);
-});
+  process.on('unhandledRejection', (err) => {
+    console.error('Unhandled rejection:', err);
+  });
+}
+
+export default app;
