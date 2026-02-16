@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSiteSettings } from '../lib/useSiteSettings';
+import { usePageContent } from '../lib/useDynamicContent';
 
 const ContactPage: React.FC = () => {
   const { settings } = useSiteSettings();
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'he';
+  const page = usePageContent('contact');
 
   const phone = settings.phone || '050-XXXXXXX';
   const email = settings.email || 'office@example.com';
@@ -53,8 +55,8 @@ const ContactPage: React.FC = () => {
     <div className="animate-fade-in pb-20">
       <header className="bg-slate-50 border-b border-slate-200 py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-6">{t('contact.title')}</h1>
-          <p className="text-xl text-slate-600 leading-relaxed">{t('contact.subtitle')}</p>
+          <h1 className="text-4xl font-bold mb-6">{page?.title || t('contact.title')}</h1>
+          <p className="text-xl text-slate-600 leading-relaxed">{page?.content || t('contact.subtitle')}</p>
         </div>
       </header>
 

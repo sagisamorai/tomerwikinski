@@ -3,23 +3,33 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CheckCircle2, Globe, Building } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useServiceContent } from '../lib/useDynamicContent';
 
 const ServiceRealEstate: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'he';
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
   const includes = t('services.realEstate.includes', { returnObjects: true }) as string[];
+  const svc = useServiceContent('real-estate');
 
   return (
     <div className="animate-fade-in pb-20">
       <header className="bg-slate-900 text-white py-20">
         <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-6">{t('services.realEstate.title')}</h1>
-          <p className="text-xl text-slate-300 leading-relaxed">{t('services.realEstate.subtitle')}</p>
+          <h1 className="text-4xl font-bold mb-6">{svc?.title || t('services.realEstate.title')}</h1>
+          <p className="text-xl text-slate-300 leading-relaxed">{svc?.shortDescription || t('services.realEstate.subtitle')}</p>
         </div>
       </header>
 
       <section className="py-20 max-w-4xl mx-auto px-4">
+        {svc?.fullContent && (
+          <div className="mb-16 space-y-4">
+            {svc.fullContent.split(/\n\n+/).filter(Boolean).map((p, i) => (
+              <p key={i} className="text-lg text-slate-600 leading-relaxed">{p}</p>
+            ))}
+          </div>
+        )}
+
         <div className="mb-16 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="p-6 bg-white border border-slate-100 rounded-xl shadow-sm">
             <div className="text-slate-400 mb-4"><Building size={32} /></div>

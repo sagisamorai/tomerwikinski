@@ -3,9 +3,42 @@ import prisma from '../lib/prisma.js';
 import { logAudit } from '../lib/audit.js';
 import { requireAuth, getUserInfo } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
+import { getLangFromQuery, localizeRecord } from '../lib/localize.js';
 import { z } from 'zod';
 
 const router = Router();
+
+// Public: GET /api/services/public - list active services (no auth)
+router.get('/public', async (req: Request, res: Response) => {
+  try {
+    const lang = getLangFromQuery(req.query);
+    const services = await prisma.service.findMany({
+      where: { isActive: true, deletedAt: null },
+      orderBy: { order: 'asc' },
+    });
+    const localized = services.map((s) => localizeRecord(s, ['title', 'shortDescription', 'fullContent'], lang));
+    res.json(localized);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'שגיאה בטעינת השירותים' });
+  }
+});
+
+// Public: GET /api/services/public/:slug - get service by slug (no auth)
+router.get('/public/:slug', async (req: Request, res: Response) => {
+  try {
+    const lang = getLangFromQuery(req.query);
+    const service = await prisma.service.findFirst({
+      where: { slug: req.params.slug, isActive: true, deletedAt: null },
+    });
+    if (!service) { res.status(404).json({ error: 'השירות לא נמצא' }); return; }
+    const localized = localizeRecord(service, ['title', 'shortDescription', 'fullContent'], lang);
+    res.json(localized);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'שגיאה בטעינת השירות' });
+  }
+});
 
 const serviceSchema = z.object({
   title: z.string().min(1, 'כותרת היא שדה חובה'),

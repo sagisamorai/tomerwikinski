@@ -1,36 +1,31 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, Users, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSiteSettings } from '../lib/useSiteSettings';
+import { usePageContent, useAllServices } from '../lib/useDynamicContent';
 
-interface DynamicPage {
-  title: string;
-  content: string;
-}
+const iconMap: Record<string, React.FC<{ size: number }>> = {
+  Briefcase, Users, Building2,
+};
+
+const slugToRoute: Record<string, string> = {
+  strategy: '/services/strategy',
+  coaching: '/services/coaching',
+  'real-estate': '/services/real-estate',
+};
 
 const HomePage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'he';
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
+  const { settings } = useSiteSettings();
+  const aboutPage = usePageContent('about');
+  const services = useAllServices();
 
-  // Fetch "about" page content from DB so admin edits show up
-  const [aboutPage, setAboutPage] = useState<DynamicPage | null>(null);
-
-  const fetchAbout = useCallback(() => {
-    const lang = localStorage.getItem('i18nextLng') || 'he';
-    fetch(`/api/pages/public/about?lang=${lang}`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data) setAboutPage(data); })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => { fetchAbout(); }, [fetchAbout]);
-  useEffect(() => {
-    const handler = () => fetchAbout();
-    window.addEventListener('languageChanged', handler);
-    return () => window.removeEventListener('languageChanged', handler);
-  }, [fetchAbout]);
+  const heroTitle = settings.hero_title || t('home.heroTitle1');
+  const heroSubtitle = settings.hero_subtitle || t('home.heroSubtitle');
 
   return (
     <div className="animate-fade-in">
@@ -38,11 +33,10 @@ const HomePage: React.FC = () => {
         <div className="absolute inset-0 opacity-20 bg-[url('https://picsum.photos/1920/1080')] bg-cover bg-center"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-            {t('home.heroTitle1')}<br />
-            {t('home.heroTitle2')}
+            {heroTitle}
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10">
-            {t('home.heroSubtitle')}
+            {heroSubtitle}
           </p>
           <p className="text-sm uppercase tracking-widest text-slate-400 mb-8 font-semibold">
             {t('home.heroExpertise')}
@@ -78,30 +72,24 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-16">{t('home.servicesTitle')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-slate-100">
-              <div className="bg-slate-100 p-4 rounded-full w-fit mb-6 text-slate-700"><Briefcase size={32} /></div>
-              <h3 className="text-xl font-bold mb-4">{t('home.serviceStrategy')}</h3>
-              <p className="text-slate-600 mb-8 flex-grow">{t('home.serviceStrategyDesc')}</p>
-              <Link to="/services/strategy" className="text-slate-900 font-semibold flex items-center gap-2 group">
-                {t('home.learnMore')} <Chevron size={18} className={`transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-              </Link>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-slate-100">
-              <div className="bg-slate-100 p-4 rounded-full w-fit mb-6 text-slate-700"><Users size={32} /></div>
-              <h3 className="text-xl font-bold mb-4">{t('home.serviceCoaching')}</h3>
-              <p className="text-slate-600 mb-8 flex-grow">{t('home.serviceCoachingDesc')}</p>
-              <Link to="/services/coaching" className="text-slate-900 font-semibold flex items-center gap-2 group">
-                {t('home.learnMore')} <Chevron size={18} className={`transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-              </Link>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-slate-100">
-              <div className="bg-slate-100 p-4 rounded-full w-fit mb-6 text-slate-700"><Building2 size={32} /></div>
-              <h3 className="text-xl font-bold mb-4">{t('home.serviceRealEstate')}</h3>
-              <p className="text-slate-600 mb-8 flex-grow">{t('home.serviceRealEstateDesc')}</p>
-              <Link to="/services/real-estate" className="text-slate-900 font-semibold flex items-center gap-2 group">
-                {t('home.learnMore')} <Chevron size={18} className={`transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-              </Link>
-            </div>
+            {(services.length > 0 ? services : [
+              { slug: 'strategy', title: t('home.serviceStrategy'), shortDescription: t('home.serviceStrategyDesc'), icon: 'Briefcase' },
+              { slug: 'coaching', title: t('home.serviceCoaching'), shortDescription: t('home.serviceCoachingDesc'), icon: 'Users' },
+              { slug: 'real-estate', title: t('home.serviceRealEstate'), shortDescription: t('home.serviceRealEstateDesc'), icon: 'Building2' },
+            ]).map((svc) => {
+              const Icon = iconMap[svc.icon] || Briefcase;
+              const route = slugToRoute[svc.slug] || `/page/${svc.slug}`;
+              return (
+                <div key={svc.slug} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-slate-100">
+                  <div className="bg-slate-100 p-4 rounded-full w-fit mb-6 text-slate-700"><Icon size={32} /></div>
+                  <h3 className="text-xl font-bold mb-4">{svc.title}</h3>
+                  <p className="text-slate-600 mb-8 flex-grow">{svc.shortDescription}</p>
+                  <Link to={route} className="text-slate-900 font-semibold flex items-center gap-2 group">
+                    {t('home.learnMore')} <Chevron size={18} className={`transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
