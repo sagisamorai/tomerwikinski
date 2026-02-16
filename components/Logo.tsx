@@ -11,10 +11,10 @@ interface LogoProps {
   imgClass?: string;
 }
 
-const contextConfig: Record<string, { scale: number; maxHeight: number }> = {
-  navbar:  { scale: 1,    maxHeight: 56 },
-  sidebar: { scale: 0.70, maxHeight: 36 },
-  footer:  { scale: 0.80, maxHeight: 44 },
+const contextConfig: Record<string, { maxHeight: number }> = {
+  navbar:  { maxHeight: 56 },
+  sidebar: { maxHeight: 36 },
+  footer:  { maxHeight: 52 },
 };
 
 const Logo: React.FC<LogoProps> = ({
@@ -27,13 +27,20 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   const { settings } = useSiteSettings();
 
-  const logoUrl = settings.logo_url;
-  const prefix = settings.logo_prefix ?? 'GROUP';
-  const suffix = settings.logo_suffix ?? 'CONSULT';
+  const isFooter = context === 'footer';
 
-  const baseSize = parseInt(settings.logo_size || '40', 10);
+  // Footer uses its own logo settings if they exist, otherwise falls back to the main logo
+  const footerHasOwnLogo = !!(settings.footer_logo_url || settings.footer_logo_prefix || settings.footer_logo_suffix);
+
+  const logoUrl = isFooter && footerHasOwnLogo ? (settings.footer_logo_url || '') : (settings.logo_url || '');
+  const prefix = isFooter && footerHasOwnLogo ? (settings.footer_logo_prefix || '') : (settings.logo_prefix ?? 'GROUP');
+  const suffix = isFooter && footerHasOwnLogo ? (settings.footer_logo_suffix || '') : (settings.logo_suffix ?? 'CONSULT');
+  const baseSize = isFooter && footerHasOwnLogo
+    ? parseInt(settings.footer_logo_size || '36', 10)
+    : parseInt(settings.logo_size || '40', 10);
+
   const cfg = contextConfig[context] ?? contextConfig.navbar;
-  const finalHeight = Math.min(Math.round(baseSize * cfg.scale), cfg.maxHeight);
+  const finalHeight = Math.min(baseSize, cfg.maxHeight);
 
   const content = logoUrl ? (
     <img

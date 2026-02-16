@@ -19,8 +19,12 @@ async function main() {
     { key: 'logo_prefix', value: 'GROUP', group: 'branding', label: 'לוגו - חלק ראשון (צבע בהיר)', type: 'text', order: 1 },
     { key: 'logo_suffix', value: 'CONSULT', group: 'branding', label: 'לוגו - חלק שני (צבע כהה)', type: 'text', order: 2 },
     { key: 'logo_url', value: '', group: 'branding', label: 'לוגו תמונה (URL) - אופציונלי, מחליף טקסט', type: 'image', order: 3 },
-    { key: 'logo_size', value: '40', group: 'branding', label: 'גודל לוגו (פיקסלים) - גובה הלוגו באתר', type: 'range', order: 4 },
-    { key: 'favicon_url', value: '', group: 'branding', label: 'Favicon (URL)', type: 'image', order: 5 },
+    { key: 'logo_size', value: '40', group: 'branding', label: 'גודל לוגו ניווט (פיקסלים)', type: 'range', order: 4 },
+    { key: 'footer_logo_prefix', value: '', group: 'branding', label: 'לוגו פוטר - חלק ראשון (צבע בהיר)', type: 'text', order: 5 },
+    { key: 'footer_logo_suffix', value: '', group: 'branding', label: 'לוגו פוטר - חלק שני (צבע כהה)', type: 'text', order: 6 },
+    { key: 'footer_logo_url', value: '', group: 'branding', label: 'לוגו פוטר תמונה (URL) - אופציונלי', type: 'image', order: 7 },
+    { key: 'footer_logo_size', value: '36', group: 'branding', label: 'גודל לוגו פוטר (פיקסלים)', type: 'range', order: 8 },
+    { key: 'favicon_url', value: '', group: 'branding', label: 'Favicon (URL)', type: 'image', order: 9 },
   ];
 
   for (const s of settings) {

@@ -120,11 +120,19 @@ const SiteSettings: React.FC = () => {
 
             {/* Live logo preview for branding group */}
             {groupKey === 'branding' && (
-              <LogoPreview
-                logoUrl={getValueByKey('logo_url')}
-                prefix={getValueByKey('logo_prefix') || 'GROUP'}
-                suffix={getValueByKey('logo_suffix') || 'CONSULT'}
-                size={parseInt(getValueByKey('logo_size') || '40', 10)}
+              <DualLogoPreview
+                navLogoUrl={getValueByKey('logo_url')}
+                navPrefix={getValueByKey('logo_prefix') || 'GROUP'}
+                navSuffix={getValueByKey('logo_suffix') || 'CONSULT'}
+                navSize={parseInt(getValueByKey('logo_size') || '40', 10)}
+                footerLogoUrl={getValueByKey('footer_logo_url')}
+                footerPrefix={getValueByKey('footer_logo_prefix')}
+                footerSuffix={getValueByKey('footer_logo_suffix')}
+                footerSize={parseInt(getValueByKey('footer_logo_size') || '36', 10)}
+                fallbackPrefix={getValueByKey('logo_prefix') || 'GROUP'}
+                fallbackSuffix={getValueByKey('logo_suffix') || 'CONSULT'}
+                fallbackUrl={getValueByKey('logo_url')}
+                fallbackSize={parseInt(getValueByKey('logo_size') || '40', 10)}
               />
             )}
 
@@ -206,26 +214,46 @@ const SiteSettings: React.FC = () => {
 };
 
 
-/* ============ Logo Preview ============ */
+/* ============ Dual Logo Preview ============ */
 
-interface LogoPreviewProps {
-  logoUrl: string;
-  prefix: string;
-  suffix: string;
-  size: number;
+interface DualLogoPreviewProps {
+  navLogoUrl: string;
+  navPrefix: string;
+  navSuffix: string;
+  navSize: number;
+  footerLogoUrl: string;
+  footerPrefix: string;
+  footerSuffix: string;
+  footerSize: number;
+  fallbackPrefix: string;
+  fallbackSuffix: string;
+  fallbackUrl: string;
+  fallbackSize: number;
 }
 
 const NAVBAR_MAX = 56;
-const FOOTER_SCALE = 0.80;
-const FOOTER_MAX = 44;
+const FOOTER_MAX = 52;
 
-const LogoPreview: React.FC<LogoPreviewProps> = ({ logoUrl, prefix, suffix, size }) => {
-  const navbarSize = Math.min(size, NAVBAR_MAX);
-  const footerSize = Math.min(Math.round(size * FOOTER_SCALE), FOOTER_MAX);
+const DualLogoPreview: React.FC<DualLogoPreviewProps> = ({
+  navLogoUrl, navPrefix, navSuffix, navSize,
+  footerLogoUrl, footerPrefix, footerSuffix, footerSize,
+  fallbackPrefix, fallbackSuffix, fallbackUrl, fallbackSize,
+}) => {
+  const navDisplay = Math.min(navSize, NAVBAR_MAX);
 
-  const renderLogo = (displaySize: number, textClass: string, prefixCls: string) => {
-    if (logoUrl) {
-      return <img src={logoUrl} alt="לוגו" style={{ height: `${displaySize}px` }} className="w-auto object-contain" />;
+  // Footer: if no footer-specific logo is set, show the navbar logo as fallback
+  const hasFooterLogo = !!(footerLogoUrl || footerPrefix || footerSuffix);
+  const fUrl = hasFooterLogo ? footerLogoUrl : fallbackUrl;
+  const fPrefix = hasFooterLogo ? footerPrefix : fallbackPrefix;
+  const fSuffix = hasFooterLogo ? footerSuffix : fallbackSuffix;
+  const fSize = hasFooterLogo ? Math.min(footerSize, FOOTER_MAX) : Math.min(Math.round(fallbackSize * 0.8), FOOTER_MAX);
+
+  const renderLogo = (url: string, prefix: string, suffix: string, displaySize: number, textClass: string, prefixCls: string) => {
+    if (url) {
+      return <img src={url} alt="לוגו" style={{ height: `${displaySize}px` }} className="w-auto object-contain" />;
+    }
+    if (!prefix && !suffix) {
+      return <span className="text-xs text-slate-400 italic">לא הוגדר לוגו</span>;
     }
     return (
       <span className={`font-bold tracking-tight leading-none ${textClass}`} style={{ fontSize: `${displaySize}px`, lineHeight: 1.1 }}>
@@ -236,26 +264,26 @@ const LogoPreview: React.FC<LogoPreviewProps> = ({ logoUrl, prefix, suffix, size
 
   return (
     <div className="mb-6 p-5 bg-slate-50 border border-slate-200 rounded-lg">
-      <div className="text-xs font-semibold text-slate-400 mb-3">תצוגה מקדימה של הלוגו</div>
+      <div className="text-xs font-semibold text-slate-400 mb-3">תצוגה מקדימה</div>
       <div className="flex items-stretch gap-4">
-        {/* Navbar preview */}
         <div className="flex-1">
-          <div className="text-[10px] text-slate-400 mb-1.5 text-center font-medium">ניווט עליון ({navbarSize}px)</div>
+          <div className="text-[10px] text-slate-400 mb-1.5 text-center font-medium">לוגו ניווט עליון ({navDisplay}px)</div>
           <div className="bg-white border border-slate-100 rounded-lg p-4 flex items-center justify-center" style={{ minHeight: '68px' }}>
-            {renderLogo(navbarSize, '', 'text-slate-500')}
+            {renderLogo(navLogoUrl, navPrefix, navSuffix, navDisplay, '', 'text-slate-500')}
           </div>
         </div>
-        {/* Footer/dark preview */}
         <div className="flex-1">
-          <div className="text-[10px] text-slate-400 mb-1.5 text-center font-medium">פוטר / סיידבר ({footerSize}px)</div>
+          <div className="text-[10px] text-slate-400 mb-1.5 text-center font-medium">
+            לוגו פוטר ({fSize}px){!hasFooterLogo && ' - ברירת מחדל'}
+          </div>
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 flex items-center justify-center" style={{ minHeight: '68px' }}>
-            {renderLogo(footerSize, 'text-white', 'text-slate-400')}
+            {renderLogo(fUrl, fPrefix, fSuffix, fSize, 'text-white', 'text-slate-400')}
           </div>
         </div>
       </div>
-      {size > NAVBAR_MAX && (
-        <div className="text-xs text-amber-600 mt-2 text-center">
-          הגודל שנבחר ({size}px) מוגבל ל-{NAVBAR_MAX}px בניווט העליון כדי לשמור על מראה תקין
+      {!hasFooterLogo && (
+        <div className="text-xs text-blue-500 mt-2 text-center">
+          לא הוגדר לוגו נפרד לפוטר — מוצג לוגו הניווט כברירת מחדל. הגדר ערכים בשדות "לוגו פוטר" ליצירת לוגו נפרד.
         </div>
       )}
     </div>
