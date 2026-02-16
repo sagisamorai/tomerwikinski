@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 
 const languages = [
-  { code: 'he', label: 'עברית', flag: '🇮🇱', short: 'IL' },
-  { code: 'en', label: 'English', flag: '🇺🇸', short: 'EN' },
-  { code: 'pt', label: 'Português', flag: '🇵🇹', short: 'PT' },
+  { code: 'he', label: 'עברית', flagImg: 'https://flagcdn.com/w40/il.png' },
+  { code: 'en', label: 'English', flagImg: 'https://flagcdn.com/w40/us.png' },
+  { code: 'pt', label: 'Português', flagImg: 'https://flagcdn.com/w40/pt.png' },
 ];
 
 const LanguageSwitcher: React.FC = () => {
@@ -51,7 +51,7 @@ const LanguageSwitcher: React.FC = () => {
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
-              <span className="text-xs font-mono text-slate-400 w-5">{lang.short}</span>
+              <img src={lang.flagImg} alt="" className="w-5 h-3.5 object-cover rounded-sm" />
               <span>{lang.label}</span>
             </button>
           ))}
