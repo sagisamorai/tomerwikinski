@@ -6,7 +6,6 @@ interface LogoProps {
   to?: string;
   className?: string;
   prefixClass?: string;
-  suffixClass?: string;
   context?: 'navbar' | 'sidebar' | 'footer';
   imgClass?: string;
 }
@@ -15,7 +14,6 @@ const Logo: React.FC<LogoProps> = ({
   to = '/',
   className = '',
   prefixClass = 'text-slate-500',
-  suffixClass = '',
   context = 'navbar',
   imgClass = '',
 }) => {
@@ -31,30 +29,30 @@ const Logo: React.FC<LogoProps> = ({
   const prefix = isFooter && footerHasOwnLogo ? (settings.footer_logo_prefix || '') : (settings.logo_prefix ?? 'GROUP');
   const suffix = isFooter && footerHasOwnLogo ? (settings.footer_logo_suffix || '') : (settings.logo_suffix ?? 'CONSULT');
 
-  // logo_size controls WIDTH for images, FONT-SIZE for text
-  const size = isFooter && footerHasOwnLogo
+  // logo_size = unified "visual width" in pixels.
+  // Images: rendered at this width, height auto.
+  // Text: font-size derived proportionally (width * 0.28).
+  const rawSize = isFooter && footerHasOwnLogo
     ? parseInt(settings.footer_logo_size || '160', 10)
     : parseInt(settings.logo_size || '160', 10);
 
-  const scale = isSidebar ? 0.55 : 1;
-  const finalSize = Math.round(size * scale);
+  const scale = isSidebar ? 0.5 : 1;
+  const size = Math.round(rawSize * scale);
 
   const showImage = logoUrl && !imgError;
 
   const content = showImage ? (
-    // IMAGE logo: size = width, height auto (proportional)
     <img
       src={logoUrl}
       alt={`${prefix}${suffix}`}
-      style={{ width: `${finalSize}px` }}
+      style={{ width: `${size}px` }}
       className={`h-auto object-contain block max-w-full max-h-full ${imgClass}`}
       onError={() => setImgError(true)}
     />
   ) : (
-    // TEXT logo: size = font-size
     <span
-      className={`font-bold tracking-tight leading-none whitespace-nowrap block overflow-hidden text-ellipsis ${className}`}
-      style={{ fontSize: `${finalSize}px`, lineHeight: 1.1 }}
+      className={`font-bold tracking-tight leading-none whitespace-nowrap block ${className}`}
+      style={{ fontSize: `${Math.round(size * 0.28)}px`, lineHeight: 1.15 }}
     >
       <span className={prefixClass}>{prefix}</span>{suffix}
     </span>

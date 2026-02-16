@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -39,38 +38,25 @@ const Navbar: React.FC = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/*
-          Layout: 3-column flex.
-          - Logo: flex-shrink-0, capped to 35vw so it never eats nav links
-          - Nav links: flex-1, centered
-          - Language switcher: flex-shrink-0
-          min/max height keeps the bar proportional even with large logos
-        */}
         <div
           className="flex items-center transition-all duration-300 py-2"
-          style={{
-            minHeight: scrolled ? '64px' : '76px',
-            maxHeight: '100px',
-          }}
+          style={{ height: scrolled ? '70px' : '80px' }}
         >
-          {/* Logo container - capped to prevent pushing nav links off screen */}
-          <div
-            className="flex-shrink-0 flex items-center overflow-hidden"
-            style={{ maxWidth: 'min(40vw, 300px)', maxHeight: '90px' }}
-          >
+          {/* Logo — capped so nav links always have room */}
+          <div className="flex-shrink-0 flex items-center" style={{ maxWidth: '300px', maxHeight: '64px', overflow: 'hidden' }}>
             <Logo to="/" className="text-slate-900" prefixClass="text-slate-500" context="navbar" />
           </div>
-          
-          {/* Nav links - take remaining space, always centered */}
+
+          {/* Nav links — centered in remaining space */}
           <div className="hidden md:flex flex-1 items-center justify-center min-w-0">
-            <div className={`flex items-center flex-wrap justify-center gap-y-1 ${isRtl ? 'space-x-5 space-x-reverse' : 'space-x-5'}`}>
+            <div className={`flex items-center ${isRtl ? 'space-x-5 space-x-reverse' : 'space-x-5'}`}>
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={`px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                    location.pathname === link.path 
-                      ? 'text-slate-900 border-b-2 border-slate-900' 
+                    location.pathname === link.path
+                      ? 'text-slate-900 border-b-2 border-slate-900'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -85,7 +71,7 @@ const Navbar: React.FC = () => {
             <LanguageSwitcher />
           </div>
 
-          {/* Mobile: language + hamburger */}
+          {/* Mobile */}
           <div className="md:hidden flex flex-1 items-center justify-end gap-2">
             <LanguageSwitcher />
             <button

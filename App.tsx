@@ -24,7 +24,7 @@ const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 const PublicSite: React.FC = () => (
   <div className="flex flex-col min-h-screen bg-slate-50">
     <Navbar />
-    <main className="flex-grow pt-[100px]">
+    <main className="flex-grow pt-20">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/approach" element={<ApproachPage />} />
