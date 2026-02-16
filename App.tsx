@@ -15,6 +15,7 @@ import ServiceStrategy from './pages/ServiceStrategy';
 import ServiceCoaching from './pages/ServiceCoaching';
 import ServiceRealEstate from './pages/ServiceRealEstate';
 import ContactPage from './pages/ContactPage';
+import DynamicPage from './pages/DynamicPage';
 
 import AdminApp from './admin/AdminApp';
 
@@ -31,6 +32,7 @@ const PublicSite: React.FC = () => (
         <Route path="/services/coaching" element={<ServiceCoaching />} />
         <Route path="/services/real-estate" element={<ServiceRealEstate />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/page/:slug" element={<DynamicPage />} />
       </Routes>
     </main>
     <Footer />

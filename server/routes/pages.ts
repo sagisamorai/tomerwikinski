@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js';
 import { logAudit } from '../lib/audit.js';
 import { requireAuth, getUserInfo } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
+import { getLangFromQuery, localizeRecord } from '../lib/localize.js';
 import { z } from 'zod';
 
 const router = Router();
@@ -24,7 +25,40 @@ const pageSchema = z.object({
   status: z.enum(['draft', 'published']).default('draft'),
 });
 
-// GET /api/pages - list all pages
+// GET /api/pages/public/:slug - public endpoint to fetch a published page by slug (no auth)
+router.get('/public/:slug', async (req: Request, res: Response) => {
+  try {
+    const lang = getLangFromQuery(req.query);
+    const page = await prisma.page.findFirst({
+      where: { slug: req.params.slug, status: 'published', deletedAt: null },
+    });
+    if (!page) { res.status(404).json({ error: 'הדף לא נמצא' }); return; }
+    const localized = localizeRecord(page, ['title', 'content', 'metaTitle', 'metaDescription'], lang);
+    res.json(localized);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'שגיאה בטעינת הדף' });
+  }
+});
+
+// GET /api/pages/public - list all published pages (no auth), for navigation
+router.get('/public', async (req: Request, res: Response) => {
+  try {
+    const lang = getLangFromQuery(req.query);
+    const pages = await prisma.page.findMany({
+      where: { status: 'published', deletedAt: null },
+      select: { slug: true, title: true, title_en: true, title_pt: true, metaTitle: true, metaTitle_en: true, metaTitle_pt: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const localized = pages.map((p) => localizeRecord(p, ['title', 'metaTitle'], lang));
+    res.json(localized);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'שגיאה בטעינת הדפים' });
+  }
+});
+
+// GET /api/pages - list all pages (admin)
 router.get('/', requireAuth, async (_req: Request, res: Response) => {
   try {
     const pages = await prisma.page.findMany({
