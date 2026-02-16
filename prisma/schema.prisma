@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Page {
+  id              String    @id @default(cuid())
+  title           String
+  title_en        String?
+  title_pt        String?
+  slug            String    @unique
+  content         String    @default("")
+  content_en      String?
+  content_pt      String?
+  metaTitle       String?
+  metaTitle_en    String?
+  metaTitle_pt    String?
+  metaDescription String?
+  metaDescription_en String?
+  metaDescription_pt String?
+  status          String    @default("draft")
+  createdBy       String?
+  updatedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+}
+
+model Service {
+  id                   String    @id @default(cuid())
+  title                String
+  title_en             String?
+  title_pt             String?
+  slug                 String    @unique
+  shortDescription     String
+  shortDescription_en  String?
+  shortDescription_pt  String?
+  fullContent          String    @default("")
+  fullContent_en       String?
+  fullContent_pt       String?
+  icon                 String    @default("Briefcase")
+  imageUrl             String?
+  order                Int       @default(0)
+  isActive             Boolean   @default(true)
+  createdBy            String?
+  updatedBy            String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  name           String
+  name_en        String?
+  name_pt        String?
+  slug           String       @unique
+  description    String?
+  description_en String?
+  description_pt String?
+  order          Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  media          MediaAsset[]
+}
+
+model MediaAsset {
+  id           String    @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  alt          String?
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @default("")
+  value_en  String?
+  value_pt  String?
+  group     String   @default("general")
+  label     String
+  type      String   @default("text")
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Testimonial {
+  id         String    @id @default(cuid())
+  name       String
+  role       String
+  role_en    String?
+  role_pt    String?
+  company    String?
+  company_en String?
+  company_pt String?
+  content    String
+  content_en String?
+  content_pt String?
+  imageUrl   String?
+  order      Int       @default(0)
+  isActive   Boolean   @default(true)
+  createdBy  String?
+  updatedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
+
+model FAQ {
+  id          String    @id @default(cuid())
+  question    String
+  question_en String?
+  question_pt String?
+  answer      String
+  answer_en   String?
+  answer_pt   String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  userName   String
+  userRole   String?
+  action     String
+  entityType String
+  entityId   String
+  entityName String?
+  details    String?
+  createdAt  DateTime @default(now())
+}
